@@ -84,6 +84,9 @@ Short Ratio: {info.get('shortRatio')}
 Implied Volatility: {info.get('impliedVolatility')}
 """
 
+
+
+
 # --- AI Assessment Function ---
 def get_ai_investment_assessment(company_name):
     """
@@ -92,7 +95,24 @@ def get_ai_investment_assessment(company_name):
     if not company_name:
         return "Please enter a company name."
     
-    financials= get_financial_summary(company_name)
+
+    def get_ticker_from_name(name):
+
+        prompt=f'''In one word give the ticker symbol of {name} name so I can input it into yfinance.
+        Keep in mind the where the company is based. For instance a company listed on LSE will be XYZ.L,
+        while a company listed on NIFTY will be XYZ.NS.
+        Do not include any other information, just the ticker symbol.'''
+        
+        try:
+            response = model.generate_content(prompt)
+            return response.text.strip().upper()
+        except Exception as e:
+            print(f"An error occurred while calling the API: {e}")
+            return None    
+    
+    company_ticker = get_ticker_from_name(company_name)
+
+    financials = get_financial_summary(company_ticker)
 
     prompt = f""" You are an expert financial analyst. Your task is to perform an in-depth analysis of the company's financial data provided below and present your findings in a structured, five-part report.
 
